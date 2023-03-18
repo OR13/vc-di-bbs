@@ -19,9 +19,11 @@ it("can generate JWK from seed", async () => {
 it("can sign with private key", async () => {
   const msg = Array(5).fill(null).map(() => crypto.randomBytes(20));
   const signature = await JWK.sign(msg, privateKey)
-  const verified = await JWK.verify(msg, signature, privateKey)
-  expect(verified).toBe(true)
-
-  const proof = await JWK.deriveProof(msg, signature, [1,3], privateKey)
-  console.log(proof)
+  const verified1 = await JWK.verify(msg, signature, privateKey)
+  expect(verified1).toBe(true)
+  const disclosed =  [ 2, 3, 5 ]
+  const proof = await JWK.deriveProof(msg, signature, disclosed, privateKey)
+  const disclosedMessages = msg.filter((v, i, a) => {return disclosed.includes(i+1)});
+  const verified2 = await JWK.verifyProof(proof.generators, disclosedMessages, proof.value, disclosed, privateKey)
+  expect(verified2).toBe(true)
 });
