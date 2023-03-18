@@ -1,2 +1,3 @@
-const type = 'BBS'
-export {type}
+import * as JWK from './JWK'
+
+export {JWK}
