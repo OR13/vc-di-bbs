@@ -43,4 +43,12 @@ export const verify = async (msg: any[], signature: string, publicKey:any) => {
 }
 
 
-    
+export const deriveProof = async(msg: any[], signature: string, disclosed_indexes: number[], publicKey:any) => {
+    const PK = base64url.decode(publicKey.x)
+    const ph = Buffer.from("PRESENTATION HEADER", "utf-8");
+    const length = msg.length;
+    const header = Buffer.from("HEADER", "utf-8");
+    const generators = await bbs.create_generators(length);
+    const proof = bbs.ProofGen(PK, Uint8Array.from(base64url.decode(signature)), header, ph, msg, generators, disclosed_indexes);
+    return base64url.encode(proof);
+}    

@@ -21,4 +21,7 @@ it("can sign with private key", async () => {
   const signature = await JWK.sign(msg, privateKey)
   const verified = await JWK.verify(msg, signature, privateKey)
   expect(verified).toBe(true)
+
+  const proof = await JWK.deriveProof(msg, signature, [1,3], privateKey)
+  console.log(proof)
 });
