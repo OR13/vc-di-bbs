@@ -9,6 +9,10 @@
 
 <!-- [![NPM](https://nodei.co/npm/@or13/vc-di-bbs.png?mini=true)](https://npmjs.org/package/@or13/vc-di-bbs) -->
 
+Experimental implementation of bbs data integrity proofs.
+
+Built on: [microsoft/bbs-node-reference](https://github.com/microsoft/bbs-node-reference)
+
 ## Develop
 
 ```bash

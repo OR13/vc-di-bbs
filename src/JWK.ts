@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { BBS, utils } from "@or13/bbs-node-reference";
+import { BBS } from "@or13/bbs-node-reference";
 
 import {base64url} from 'jose';
 

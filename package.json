@@ -15,8 +15,8 @@
     "clean": "rm -rf ./dist",
     "prebuild": "npm run clean",
     "build": "tsc -b",
-    "test": "jest",
-    "coverage": "jest --ci --coverage",
+    "test": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest ",
+    "coverage": "NODE_NO_WARNINGS=1 NODE_OPTIONS=--experimental-vm-modules jest --ci --coverage",
     "lint": "eslint ./src ./test --fix",
     "shove": "git add -A; git commit -m ':rocket:'; git push origin main"
   },
@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@or13/bbs-node-reference": "^0.0.0",
-    "jose": "^4.13.1"
+    "jose": "^4.13.1",
+    "jsonld": "^8.1.1"
   }
 }

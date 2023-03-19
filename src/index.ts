@@ -1,3 +1,3 @@
 import * as JWK from './JWK'
-
-export {JWK}
+import { DataIntegrity } from './DataIntegrity'
+export { JWK, DataIntegrity }
