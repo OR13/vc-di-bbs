@@ -2,7 +2,6 @@ import { DataIntegrity } from '../src'
 
 import { documentLoader } from './documentLoader';
 
-
 const privateKey = {
   "kty": "OKP",
   "crv": "Bls12381G2",
