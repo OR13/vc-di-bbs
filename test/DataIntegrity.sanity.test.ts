@@ -32,9 +32,11 @@ it("canonize", async () => {
 
 it("sign / verify - derive / verify", async () => {
   const signed = await suite.sign(document, documentLoader);
+  // console.log(JSON.stringify(signed, null, 2))
   const verified1 = await suite.verify(signed, documentLoader);
   expect(verified1).toBe(true);
   const derived = await suite.derive(signed, frame, documentLoader);
+  // console.log(JSON.stringify(derived, null, 2))
   const verified2 = await suite.verify(derived, documentLoader);
   expect(verified2).toBe(true);
 });
