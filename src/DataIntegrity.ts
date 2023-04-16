@@ -62,7 +62,8 @@ export class DataIntegrity {
       this.privateKey
     );
     disclosedDocument.proof = {
-      type: "PartialDisclosureProof",
+      type: "DataIntegrityProof",
+      cryptosuite: 'bbs-proof-2023',
       ...proofComponents,
     };
     return disclosedDocument
@@ -86,7 +87,8 @@ export class DataIntegrity {
     const lines = this.messages(canonicalized);
     const signature = await JWK.sign(lines, this.privateKey);
     const proof = {
-      type: "FullDisclosureProof",
+      "type": "DataIntegrityProof",
+      "cryptosuite": "bbs-signature-2023",
       value: signature,
     };
     clone.proof = proof;
@@ -95,15 +97,15 @@ export class DataIntegrity {
 
   async verify(document: any, documentLoader: any) {
     const clone = JSON.parse(JSON.stringify(document));
-    const { type } = clone.proof;
-    if (type === "FullDisclosureProof") {
+    const { type, cryptosuite } = clone.proof;
+    if (type === "DataIntegrityProof" && cryptosuite === 'bbs-signature-2023') {
       const { value } = clone.proof;
       delete clone.proof;
       const canonicalized = await this.canonize(clone, documentLoader);
       const lines = this.messages(canonicalized);
       const verified = await JWK.verify(lines, value, this.privateKey);
       return verified;
-    } else if (type === "PartialDisclosureProof") {
+    } else if (type === "DataIntegrityProof" && cryptosuite === 'bbs-proof-2023') {
       const { generators, disclosed, value } = clone.proof;
       delete clone.proof;
       const revealedMessages = this.messages(
@@ -124,8 +126,8 @@ export class DataIntegrity {
 
   async derive(document: any, frame: any, documentLoader: any) {
     const clone = JSON.parse(JSON.stringify(document));
-    const { type, value } = clone.proof;
-    if (type !== "FullDisclosureProof") {
+    const { type, cryptosuite, value } = clone.proof;
+    if (type !== "DataIntegrityProof" || cryptosuite !== 'bbs-signature-2023') {
       throw new Error(
         "Expected FullDisclosureProof, encountered unsupported type: " + type
       );
