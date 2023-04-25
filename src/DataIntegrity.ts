@@ -89,7 +89,7 @@ export class DataIntegrity {
     const proof = {
       "type": "DataIntegrityProof",
       "cryptosuite": "bbs-signature-2023",
-      value: signature,
+      proofValue: signature,
     };
     clone.proof = proof;
     return clone;
@@ -99,14 +99,14 @@ export class DataIntegrity {
     const clone = JSON.parse(JSON.stringify(document));
     const { type, cryptosuite } = clone.proof;
     if (type === "DataIntegrityProof" && cryptosuite === 'bbs-signature-2023') {
-      const { value } = clone.proof;
+      const { proofValue } = clone.proof;
       delete clone.proof;
       const canonicalized = await this.canonize(clone, documentLoader);
       const lines = this.messages(canonicalized);
-      const verified = await JWK.verify(lines, value, this.privateKey);
+      const verified = await JWK.verify(lines, proofValue, this.privateKey);
       return verified;
     } else if (type === "DataIntegrityProof" && cryptosuite === 'bbs-proof-2023') {
-      const { generators, disclosed, value } = clone.proof;
+      const { generators, disclosed, proofValue } = clone.proof;
       delete clone.proof;
       const revealedMessages = this.messages(
         await this.canonize(clone, documentLoader)
@@ -114,7 +114,7 @@ export class DataIntegrity {
       const verified = await JWK.verifyProof(
         generators,
         revealedMessages,
-        value,
+        proofValue,
         disclosed,
         this.privateKey
       );
@@ -126,7 +126,7 @@ export class DataIntegrity {
 
   async derive(document: any, frame: any, documentLoader: any) {
     const clone = JSON.parse(JSON.stringify(document));
-    const { type, cryptosuite, value } = clone.proof;
+    const { type, cryptosuite, proofValue } = clone.proof;
     if (type !== "DataIntegrityProof" || cryptosuite !== 'bbs-signature-2023') {
       throw new Error(
         "Expected FullDisclosureProof, encountered unsupported type: " + type
@@ -135,6 +135,6 @@ export class DataIntegrity {
     delete clone.proof;
     const fullDocument = await this.removeBlankNodes(clone, documentLoader)
     // all messages
-    return this.disclosedDocument(fullDocument, value, frame, documentLoader)
+    return this.disclosedDocument(fullDocument, proofValue, frame, documentLoader)
   }
 }

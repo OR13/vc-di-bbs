@@ -49,7 +49,7 @@ export const deriveProof = async(msg: any[], signature: string, disclosed: numbe
     return {
         disclosed,
         generators: msg.length,
-        value: base64url.encode(proof)
+        proofValue: base64url.encode(proof)
     }
 }   
 
