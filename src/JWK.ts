@@ -25,15 +25,16 @@ export const sign = async (msg: any[], privateKey:any) => {
     const generators = await bbs.create_generators(msg.length);
     const messagesAsScalarHashes = msg.map(v => bbs.MapMessageToScalarAsHash(v));
     const signature = bbs.Sign(SK, PK, signatureHeader, messagesAsScalarHashes, generators);
-    return base64url.encode(signature);
+    return `u` + base64url.encode(signature);
 }
 
 export const verify = async (msg: any[], signature: string, publicKey:any) => {
     try {
+        const signatureBase64 = signature.replace(/^./, ""); // remove u
         const PK = base64url.decode(publicKey.x)
         const generators = await bbs.create_generators(msg.length);
         const messagesAsScalarHashes = msg.map(v => bbs.MapMessageToScalarAsHash(v));
-        bbs.Verify(PK, Uint8Array.from(base64url.decode(signature)), signatureHeader, messagesAsScalarHashes, generators);
+        bbs.Verify(PK, Uint8Array.from(base64url.decode(signatureBase64)), signatureHeader, messagesAsScalarHashes, generators);
         return true
     } catch(e){
         console.error(e)
@@ -43,22 +44,24 @@ export const verify = async (msg: any[], signature: string, publicKey:any) => {
 
 export const deriveProof = async(msg: any[], signature: string, disclosed: number[], publicKey:any) => {
     const PK = base64url.decode(publicKey.x)
+    const signatureBase64 = signature.replace(/^./, ""); // remove u
     const generators = await bbs.create_generators(msg.length);
     const messagesAsScalarHashes = msg.map(v => bbs.MapMessageToScalarAsHash(v));
-    const proof = bbs.ProofGen(PK, Uint8Array.from(base64url.decode(signature)), signatureHeader, proofHeader, messagesAsScalarHashes, generators, disclosed);
+    const proof = bbs.ProofGen(PK, Uint8Array.from(base64url.decode(signatureBase64)), signatureHeader, proofHeader, messagesAsScalarHashes, generators, disclosed);
     return {
         disclosed,
         generators: msg.length,
-        proofValue: base64url.encode(proof)
+        proofValue: `u` + base64url.encode(proof)
     }
 }   
 
 export const verifyProof = async(originalMessagesLength: number, disclosedMessages: any[], proof: string, disclosed: number[], publicKey:any) => {
     try {
+        const proofBase64 = proof.replace(/^./, ""); // remove u
         const PK = base64url.decode(publicKey.x)
         const generators = await bbs.create_generators(originalMessagesLength);
         const disclosedMessagesAsScalarHashes = disclosedMessages.map(v => bbs.MapMessageToScalarAsHash(v));
-        bbs.ProofVerify(PK, Uint8Array.from(base64url.decode(proof)), signatureHeader, proofHeader, disclosedMessagesAsScalarHashes, generators, disclosed);
+        bbs.ProofVerify(PK, Uint8Array.from(base64url.decode(proofBase64)), signatureHeader, proofHeader, disclosedMessagesAsScalarHashes, generators, disclosed);
         return true
     } catch(e){
         console.error(e)
