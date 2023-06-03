@@ -62,8 +62,11 @@ export class DataIntegrity {
       this.privateKey
     );
     disclosedDocument.proof = {
-      type: "PartialDisclosureProof",
-      ...proofComponents,
+      type: "DataIntegrityProof",
+      cryptosuite: 'bbs-proof-2023',
+      disclosed : proofComponents.disclosed,
+      generators: proofComponents.generators,
+      proofValue: `u` + proofComponents.proofValue
     };
     return disclosedDocument
   }
@@ -86,8 +89,9 @@ export class DataIntegrity {
     const lines = this.messages(canonicalized);
     const signature = await JWK.sign(lines, this.privateKey);
     const proof = {
-      type: "FullDisclosureProof",
-      value: signature,
+      "type": "DataIntegrityProof",
+      "cryptosuite": "bbs-signature-2023",
+      proofValue: `u` + signature,
     };
     clone.proof = proof;
     return clone;
@@ -95,16 +99,16 @@ export class DataIntegrity {
 
   async verify(document: any, documentLoader: any) {
     const clone = JSON.parse(JSON.stringify(document));
-    const { type } = clone.proof;
-    if (type === "FullDisclosureProof") {
-      const { value } = clone.proof;
+    const { type, cryptosuite, proofValue } = clone.proof;
+    const value = proofValue.replace(/^./, ""); // remove u
+    if (type === "DataIntegrityProof" && cryptosuite === 'bbs-signature-2023') {
       delete clone.proof;
       const canonicalized = await this.canonize(clone, documentLoader);
       const lines = this.messages(canonicalized);
       const verified = await JWK.verify(lines, value, this.privateKey);
       return verified;
-    } else if (type === "PartialDisclosureProof") {
-      const { generators, disclosed, value } = clone.proof;
+    } else if (type === "DataIntegrityProof" && cryptosuite === 'bbs-proof-2023') {
+      const { generators, disclosed } = clone.proof;
       delete clone.proof;
       const revealedMessages = this.messages(
         await this.canonize(clone, documentLoader)
@@ -124,8 +128,9 @@ export class DataIntegrity {
 
   async derive(document: any, frame: any, documentLoader: any) {
     const clone = JSON.parse(JSON.stringify(document));
-    const { type, value } = clone.proof;
-    if (type !== "FullDisclosureProof") {
+    const { type, cryptosuite, proofValue } = clone.proof;
+    const value = proofValue.replace(/^./, ""); // remove u
+    if (type !== "DataIntegrityProof" || cryptosuite !== 'bbs-signature-2023') {
       throw new Error(
         "Expected FullDisclosureProof, encountered unsupported type: " + type
       );

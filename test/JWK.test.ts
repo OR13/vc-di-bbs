@@ -23,6 +23,6 @@ it("can sign with private key", async () => {
   expect(verified1).toBe(true)
   const proof = await JWK.deriveProof(msg, signature, [ 2, 3, 5 ], privateKey)
   const disclosedMessages = msg.filter((v, i, a) => {return proof.disclosed.includes(i+1)});
-  const verified2 = await JWK.verifyProof(proof.generators, disclosedMessages, proof.value, proof.disclosed, privateKey)
+  const verified2 = await JWK.verifyProof(proof.generators, disclosedMessages, proof.proofValue, proof.disclosed, privateKey)
   expect(verified2).toBe(true)
 });
